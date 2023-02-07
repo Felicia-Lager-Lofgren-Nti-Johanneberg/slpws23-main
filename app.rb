@@ -15,18 +15,20 @@ get '/index' do
   slim(:index)
 end
 
-# 1 Registrera 
+# 1 Skapa regristrerignen
 
-# 2 Skapa Login och logga in, ha med validering, authorization och authentication
+# 2 Skapa Login och logga in, ha med validering, authorization och authentication (rb kod)
 
-# 3 Visa vilka albums som finns och skapa eget
+# 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) 
 
 get('/albums') do
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.results_as_hash = true
   result = db.execute("SELECT * FROM Albums")
+  current_albums = db.execute("SELECT album_id FROM Albums")
+  p current_albums
   p result
-  slim(:"albums/index",locals:{albums:result})
+  slim(:"/albums/index",locals:{albums:result})
 end
 
 get('/albums/new') do 
@@ -41,8 +43,6 @@ post('/albums/new') do
   db.execute("INSERT INTO Albums (title, artist_id) VALUES (?,?)",title, artist_id)
   redirect('/albums')
 end
-
-
 
 # 4 Skapa artister och forma band (table:Artists)
 
