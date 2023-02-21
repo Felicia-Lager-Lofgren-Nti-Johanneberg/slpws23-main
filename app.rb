@@ -5,6 +5,7 @@ require 'byebug'
 require 'sqlite3'
 require 'bcrypt'
 
+
 enable :sessions
 
 get('/')  do
@@ -31,11 +32,12 @@ get('/albums') do
   slim(:"/albums/index",locals:{albums:result})
 end
 
-get('/albums/new') do 
+
+get('/albums/new') do #CREATE ALBUM
   slim(:"albums/new")
 end
 
-post('/albums/new') do
+post('/albums/new') do #CREATE ALBUM
   title = params[:title]
   artist_id = params[:artist_id].to_i
   p "Vi fick in datan #{title} och #{artist_id}"
@@ -44,8 +46,37 @@ post('/albums/new') do
   redirect('/albums')
 end
 
+get('/albums/:id/edit') do   #UPPDATE
+  id = params[:id].to_i
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.results_as_hash = true
+  result = db.execute("SELECT * FROM Albums WHERE album_id = ?",id).first
+  p "result är #{result}"
+  slim(:"/albums/edit",locals:{result:result})
+end
+
+
 # 4 Skapa artister och forma band (table:Artists)
 
 # 5 Välj instrument till alla spelare (table:Instrument) => relation Artists
 
 # 6 Välj stad att turnera i (table:Tour) => relation Artists
+
+get('/tour') do
+  id = session[:id].to_i
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.results_as_hash = true
+  result = db.execute("SELECT * FROM Tour WHERE user_id = ?",id)
+  p "Alla städer  från result #{result}"
+  slim(:"albums/index",locals:{Tour:result})
+end
+
+get('/tour/show') do
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.results_as_hash = true
+  result_name = db.execute("SELECT name FROM Tour") #model
+  result_city = db.execute("SELECT city FROM Tour")  #model
+  result_price = db.execute("SELECT price FROM Tour") #model
+  p result_name
+  slim(:index)
+end
