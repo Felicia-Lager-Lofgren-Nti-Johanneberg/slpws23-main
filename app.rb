@@ -8,6 +8,9 @@ require 'bcrypt'
 
 enable :sessions
 
+output=[]
+
+
 get('/')  do
   slim(:start)
 end 
@@ -18,7 +21,46 @@ end
 
 # 1 Skapa regristrerignen
 
+post('/users/new') do   #Ny användare
+    
+  username = params[:username]
+   password = params[:password]
+   password_confirm = params[:password_confirm]
+ 
+   if (password == password_confirm)
+     #Lägg till användare
+     password_digest = BCrypt::Password.create(password)
+     db = SQLite3::Database.new('db/rocknmyb.db')
+     db.execute("INSERT INTO users (username,pwdigest) VALUES (?,?)", username, password_digest)
+     redirect('/')
+   else
+     "Fel lösen"
+   end
+ end
+
 # 2 Skapa Login och logga in, ha med validering, authorization och authentication (rb kod)
+
+get('/showlogin') do   #loginsida
+   slim(:login)
+ end
+ 
+ post('/login') do
+     username = params[:username]
+     password = params[:password]
+     db = SQLite3::Database.new('db/rocknmyb.db')   ### döp om DB Browser till rock'n'myb
+     db.results_as_hash = true
+     result=db.execute("SELECT * FROM users WHERE username=?",username).first
+     pwdigest = result["pwdigest"]
+     id = result["id"]
+   
+     if BCrypt::Password.new(pwdigest) == password
+       session[:id] = id
+       redirect('/')
+     else
+       "Fel lösen 3"  
+     end
+   end
+
 
 # 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) CREATE READ UPDATE DELETE
 
@@ -45,15 +87,16 @@ post('/albums/new') do #CREATE ALBUM
   redirect('/albums')
 end
 
-get('/albums/:id/edit') do   #UPPDATE
+
+get('/albums/:id/edit') do   #EDIT
   id = params[:id].to_i
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.results_as_hash = true
   result = db.execute("SELECT * FROM Albums WHERE album_id = ?",id).first
   p "result är #{result}"
   slim(:"/albums/edit",locals:{result:result})
+  redirect('/albums')
 end
-
 
 
 post('/albums/upload_image') do
@@ -72,7 +115,7 @@ post('/albums/upload_image') do
 
 # 5 Välj instrument till alla spelare (table:Instrument) => relation Artists
 
-# 6 Välj stad att turnera i (table:Tour) => relation Artists
+# 6 Välj stad att turnera i (table:Tour) => relation Artists + bestäm pris
 
 =begin
 get('/tour') do
@@ -84,18 +127,19 @@ get('/tour') do
 end
 =end
 
-get('/tour') do
-  slim(:forms)
+get('/tour') do  
+
 end
 
-get('/tour/tour_forms') do
-  foo = params[:secret]
-  "<h1>Test 2 #{foo}!</h1>"
-  redirect('/show')
-  slim(:index)
-  redirect('/tour/show')
+get('/') do
+ # Visa calculator-sidan
 end
 
+post('/calculate') do
+
+  redirect('/tour')
+
+end
 
 get('/tour/show') do
   db = SQLite3::Database.new("db/rocknmyb.db")

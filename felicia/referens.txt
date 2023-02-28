@@ -93,3 +93,18 @@ get('/showlogin') do   #loginsida
      end
    end
 
+
+
+
+h1 Enter text and show me 
+form action="form_tours" method="get"   
+    input name="secret" placeholder="Enter text" type="text"/
+    input type="submit" value="Show me"/
+
+get('/tour/tour_forms') do
+  foo = params[:secret]
+  "<h1>Test 2 #{foo}!</h1>"
+  redirect('/show')
+  slim(:index)
+  redirect('/tour/show')
+end
