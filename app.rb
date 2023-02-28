@@ -20,7 +20,7 @@ end
 
 # 2 Skapa Login och logga in, ha med validering, authorization och authentication (rb kod)
 
-# 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) 
+# 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) CREATE READ UPDATE DELETE
 
 get('/albums') do
   db = SQLite3::Database.new("db/rocknmyb.db")
@@ -31,7 +31,6 @@ get('/albums') do
   p result
   slim(:"/albums/index",locals:{albums:result})
 end
-
 
 get('/albums/new') do #CREATE ALBUM
   slim(:"albums/new")
@@ -56,20 +55,47 @@ get('/albums/:id/edit') do   #UPPDATE
 end
 
 
+
+post('/albums/upload_image') do
+  #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
+  path = File.join("./public/uploaded_pictures/",params[:file][:filename])
+  
+  #Spara bilden (skriv innehållet i tempfile till destinationen path)
+  File.write(path,File.read(params[:file][:tempfile]))
+  
+  redirect('/albums/upload_image')
+ end
+
+  
+ 
 # 4 Skapa artister och forma band (table:Artists)
 
 # 5 Välj instrument till alla spelare (table:Instrument) => relation Artists
 
 # 6 Välj stad att turnera i (table:Tour) => relation Artists
 
+=begin
 get('/tour') do
   id = session[:id].to_i
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.results_as_hash = true
-  result = db.execute("SELECT * FROM Tour WHERE user_id = ?",id)
-  p "Alla städer  från result #{result}"
+  result = db.execute("SELECT * FROM Tour WHERE id = ?",id)
   slim(:"albums/index",locals:{Tour:result})
 end
+=end
+
+get('/tour') do
+  slim(:forms)
+end
+
+get('/tour/tour_forms') do
+  foo = params[:secret]
+  "<h1>Test 2 #{foo}!</h1>"
+  redirect('/show')
+  slim(:index)
+  redirect('/tour/show')
+end
+
 
 get('/tour/show') do
   db = SQLite3::Database.new("db/rocknmyb.db")
