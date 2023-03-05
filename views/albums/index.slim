@@ -1,7 +1,11 @@
 h2 Your Albums:
 
 - albums.each do |x|
+    h2 Name:
     p = x["title"]
-    p = x["artist_id"]
-     a href="albums/#{album['album_id']}" #{album["title"]}
-
+    h2 Release Year:
+    p = x["artist_id"] 
+    h2 Cover: 
+    p = x["picture_id"]
+    a href="albums/#{albums[1]}" edit
+    / a href="albums/#{album['album_id']}" #{album["title"]}
