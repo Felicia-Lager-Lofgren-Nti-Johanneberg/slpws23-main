@@ -1,1 +1,16 @@
-h2 The tour
+h1 The tour
+
+#Here are the prices you can chose from:
+p = price 
+
+h2 Formulär nedan där man får välja stad, namn på turne och priset.
+
+h1 Enter the price for your tour
+form action="/calculate" method="POST"
+     input type="number" name="num1"/
+     select name="operator"
+       option value="+" selected="selected" +
+       option value="-" -
+       option value="*" *
+     input type="number" name="num2"/
+     input type="submit" value="Räkna!"

@@ -13,18 +13,23 @@ html lang="en"
       a href="/" Start
       a href="/register" Register
       a href="/showlogin" Login
-
-      a href="/albums" albums
+      a href="/logout" logout
+      a href="/albums" Albums
       a href="/albums/new" Create album
        
 
       a href="/tour" Tour 
 
- 
-
-
     h3  Welcome!
 
     <img src="rock_cover.jpg" alt="omslag">
 
-    == yield
+       - if flash[:notice]
+           p.notice = flash[:notice]
+       ==yield
+       script src="js/main.js"
+
+
+   
+
+    

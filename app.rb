@@ -5,6 +5,7 @@ require 'byebug'
 require 'sqlite3'
 require 'bcrypt'
 
+require 'sinatra/flash'
 
 enable :sessions
 
@@ -38,7 +39,7 @@ post('/users/new') do   #Ny användare
      db.execute("INSERT INTO User (username,pwdigest) VALUES (?,?)", username, password_digest)
      redirect('/')
    else
-     "Fel lösen"
+    "wrong"
    end
  end
 
@@ -51,19 +52,34 @@ get('/showlogin') do   #loginsida
  post('/login') do
      username = params[:username]
      password = params[:password]
-     db = SQLite3::Database.new('db/rocknmyb.db')   ### döp om DB Browser till rock'n'myb
+     db = SQLite3::Database.new('db/rocknmyb.db')   
      db.results_as_hash = true
      result=db.execute("SELECT * FROM User WHERE username=?",username).first
      pwdigest = result["pwdigest"]
      id = result["id"]
-   
      if BCrypt::Password.new(pwdigest) == password
        session[:id] = id
        redirect('/')
      else
-       "Fel lösen 3"  
+      "wrong password or username"
      end
    end
+
+   get('/logout') do
+    # logik för utloggning [...]
+    flash[:notice] = "You have been logged out!"
+    redirect('/')
+ end
+ 
+
+# require 'sinatra/flash' # OBS! gem install sinatra-flash
+
+# get('/logout') do
+#    # logik för utloggning [...]
+#    flash[:notice] = "You have been logged out!"
+#    redirect('/')
+# end
+
 
 
 # 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) CREATE READ UPDATE DELETE
@@ -150,8 +166,18 @@ end
 =end
 
 get('/tour') do  
-
+  slim(:"tour/index")
 end
+
+helpers do
+  def price 
+    db = SQLite3::Database.new('db/rocknmyb.db')
+    db.results_as_hash = true
+  price = db.execute("SELECT price FROM tour")
+    return price
+  end
+ end
+ 
 
 get('/') do
  # Visa calculator-sidan
@@ -173,32 +199,14 @@ post('/calculate') do
 
 end
 
-#ELLER 
-
-post '/calculate' do
-  num1 = params[:num1].to_f
-  num2 = params[:num2].to_f
-  operator = params[:operator]
-
-  case operator
-  when 'add'
-    result = num1 + num2
-  when 'subtract'
-    result = num1 - num2
-  when 'multiply'
-    result = num1 * num2
-  when 'divide'
-    result = num1 / num2
-  end
-end
 
 
 
 
 
 get('/tour/show') do
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.results_as_hash = true
+  db = SQLite3::Database.new("db/rocknmyb.db") #ta bort
+  db.results_as_hash = true #ta bort
   result_name = db.execute("SELECT name FROM Tour") #model
   result_city = db.execute("SELECT city FROM Tour")  #model
   result_price = db.execute("SELECT price FROM Tour") #model
