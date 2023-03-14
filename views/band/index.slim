@@ -1,0 +1,15 @@
+h2 Your artist:
+
+- band.each do |x|
+    h2 Name:
+    p = x["artistname"]
+    h2 Birth Year:
+    p = x["birth_year"] 
+    h2 Country: 
+    p = x["country"]
+    h2 Instruments
+    p = x["instruments"]
+    a href="albums/#{albums[1]}" edit
+    / a href="albums/#{album['album_id']}" #{album["title"]}
+
+    

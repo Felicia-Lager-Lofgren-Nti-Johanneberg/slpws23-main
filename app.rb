@@ -4,10 +4,12 @@ require 'sinatra/reloader'
 require 'byebug'
 require 'sqlite3'
 require 'bcrypt'
-
+require_relative 'model' 
 require 'sinatra/flash'
 
 enable :sessions
+
+db = SQLite3::Database.new('db/rocknmyb.db')
 
 output=[]
 
@@ -29,14 +31,13 @@ end
 post('/users/new') do   #Ny användare
     
   username = params[:username]
-   password = params[:password]
-   password_confirm = params[:password_confirm]
+  password = params[:password]
+  password_confirm = params[:password_confirm]
  
    if (password == password_confirm)
      #Lägg till användare
      password_digest = BCrypt::Password.create(password)
-     db = SQLite3::Database.new('db/rocknmyb.db')
-     db.execute("INSERT INTO User (username,pwdigest) VALUES (?,?)", username, password_digest)
+     Db_lore.new.new_user(username, password_digest)
      redirect('/')
    else
     "wrong"
@@ -52,9 +53,7 @@ get('/showlogin') do   #loginsida
  post('/login') do
      username = params[:username]
      password = params[:password]
-     db = SQLite3::Database.new('db/rocknmyb.db')   
-     db.results_as_hash = true
-     result=db.execute("SELECT * FROM User WHERE username=?",username).first
+     result = Db_lore.new.login(username, password)
      pwdigest = result["pwdigest"]
      id = result["id"]
      if BCrypt::Password.new(pwdigest) == password
@@ -149,9 +148,30 @@ post('/albums/upload_image') do
 # end
 
 
-# 4 Skapa artister och forma band (table:Artists)
+# 4 Skapa artister och forma band (table:Artists) Välj instrument till alla spelare (table:Instrument) => relation Artists
+get('/band') do  
+  user = session[:id] #sparar vilken användare som är inloggad
+  current_band = db.execute("SELECT * FROM band")
+  p current_band
+  result = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
+  p result
 
-# 5 Välj instrument till alla spelare (table:Instrument) => relation Artists
+  slim(:"/band/index",locals:{band:result})
+end
+
+get('/new_artist') do
+  slim(:"band/new")
+end
+
+post('/band') do  
+  title = params[:title]
+  starting_year = params[:starting_year]
+
+  artistname = params[:artistname]
+  age = params[:age]
+  country = params[:country]
+end
+
 
 # 6 Välj stad att turnera i (table:Tour) => relation Artists + bestäm pris
 
@@ -177,7 +197,6 @@ helpers do
     return price
   end
  end
- 
 
 get('/') do
  # Visa calculator-sidan
@@ -198,10 +217,6 @@ post('/calculate') do
   redirect('/tour')
 
 end
-
-
-
-
 
 
 get('/tour/show') do
