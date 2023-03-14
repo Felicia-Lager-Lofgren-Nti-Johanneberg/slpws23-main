@@ -1,7 +1,5 @@
 h2 Your Albums:
 
-== slim :partial
-
 - albums.each do |x|
     h2 Name:
     p = x["title"]
@@ -9,9 +7,8 @@ h2 Your Albums:
     p = x["artist_id"] 
     h2 Cover: 
     p = x["picture_id"]
-    a href="albums/#{albums[1]}" edit
+    a href="albums/#{x["album_id"]}" edit
     / a href="albums/#{album['album_id']}" #{album["title"]}
 
-    
-
+p <img src="abba.jpg" class="abba">
 

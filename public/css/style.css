@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300,400,500,600,700');
 @import url('https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
 
+
+
 nav {
     font-family: 'Rajdhani', sans-serif;
     text-transform: uppercase;
@@ -12,7 +14,9 @@ nav {
     display:flex;
     justify-content:space-around;
     align-items:center;
+   
   }
+  
 
 a {
     color: rgb(248, 248, 248);
@@ -56,12 +60,22 @@ body {
   width:100%;
   height:100%;
   background-image: 
-  radial-gradient(circle farthest-side at top left, transparent, #000000), radial-gradient(ellipse farthest-corner at 0% 20%, transparent, #af1212dc);
+  radial-gradient(circle farthest-side at top, transparent, #000000), radial-gradient(ellipse farthest-corner at 100% 20%, transparent, #000000d2);
 }
 
 img {
   width:100%;
   left: 0px;
+}
+
+
+.abba {
+  width: 600px;
+  border: 11px solid rgb(0, 0, 0);
+  margin: 25px 0;
+  position: fixed;
+  left: 56.8%;
+  top: 40%;
 }
 
 

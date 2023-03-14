@@ -22,7 +22,7 @@ get '/index' do
   slim(:index)
 end
 
-# 1 Skapa regristrerignen
+# 1 REGRISTRERING:
 
 get('/register') do   #regristrering
   slim(:register)
@@ -44,7 +44,7 @@ post('/users/new') do   #Ny användare
    end
  end
 
-# 2 Skapa Login och logga in, ha med validering, authorization och authentication (rb kod)
+# 2 Logga in, ha med validering, authorization och authentication (rb kod):
 
 get('/showlogin') do   #loginsida
    slim(:login)
@@ -80,10 +80,9 @@ get('/showlogin') do   #loginsida
 # end
 
 
-
 # 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) CREATE READ UPDATE DELETE
 
-get('/albums') do
+get('/albums') do #READ
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.results_as_hash = true
   user = session[:id]
@@ -108,8 +107,6 @@ post('/albums/new') do #CREATE ALBUM
   
   redirect('/albums')
 end
-
-
 
 get'/albums/:id' do
   db = SQLite3::Database.new("db/rocknmyb.db")
