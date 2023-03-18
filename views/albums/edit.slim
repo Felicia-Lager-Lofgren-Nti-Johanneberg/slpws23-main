@@ -1,8 +1,8 @@
-h1 edit 
+h1 EDIT 
 
-  form action="/update/#{@result[0]}" method="POST"  
-    input type="text" name="title" value="#{@result['title']}"
-    input type="hidden" name="artist_id" value="#{@result['artist_id']}"
-    input type="submit" value="Edit it"
+form action="/update/#{@result[0]}" method="POST"  
+  input type="text" name="title" value="#{@result[1]}"
+  input type="text" name="artist_id" value="#{@result[2]}"
+  input type="submit" value="Save"
     
     

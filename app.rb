@@ -44,7 +44,7 @@ post('/users/new') do   #Ny användare
    end
  end
 
-# 2 Logga in, ha med validering, authorization och authentication (rb kod):
+# 2 Logga in, authorization och authentication:
 
 get('/showlogin') do   #loginsida
    slim(:login)
@@ -67,18 +67,9 @@ get('/showlogin') do   #loginsida
    get('/logout') do
     # logik för utloggning [...]
     flash[:notice] = "You have been logged out!"
-    redirect('/')
+    session.clear 
+    slim(:"logout")
  end
- 
-
-# require 'sinatra/flash' # OBS! gem install sinatra-flash
-
-# get('/logout') do
-#    # logik för utloggning [...]
-#    flash[:notice] = "You have been logged out!"
-#    redirect('/')
-# end
-
 
 # 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) CREATE READ UPDATE DELETE
 
@@ -104,7 +95,6 @@ post('/albums/new') do #CREATE ALBUM
   p "Vi fick in datan #{title} och #{artist_id}"
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.execute("INSERT INTO albums (title, artist_id, user_id) VALUES (?,?,?)",title, artist_id, user)
-  
   redirect('/albums')
 end
 
@@ -112,17 +102,15 @@ get'/albums/:id' do
   db = SQLite3::Database.new("db/rocknmyb.db")
   @result = db.execute("SELECT * FROM albums WHERE album_id = ?",params[:id]).first
   p "result är #{@result}"
-  
   slim(:"albums/edit")
 end
 
-post('/update/:id/') do   #EDIT
+post('/update/:id') do   #EDIT
   title = params[:title]
   artist_id = params[:artist_id].to_i
   user = session[:id]
-  p "Vi fick in datan #{title} och #{artist_id}"
   db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("INSERT INTO albums (title, artist_id, user_id) VALUES (?,?,?)",title, artist_id, user)
+  db.execute("UPDATE albums SET title = ?, artist_id = ? WHERE user_id = ?",title, artist_id, user)
   
   redirect('/albums')
 end
@@ -131,44 +119,69 @@ end
 post('/albums/upload_image') do
   #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
   path = File.join("./public/uploaded_pictures/",params[:file][:filename])
-  
   #Spara bilden (skriv innehållet i tempfile till destinationen path)
   File.write(path,File.read(params[:file][:tempfile]))
   
   redirect('/albums/upload_image')
- end
+end
 
-# post('albums/:id/delete/')
-#   id = params[:id].to_i
-#   db = SQLite3::Database.new("db/rocknmyb.db")
-#   db.execute("DELETE FROM albums WHERE album_id = ?",id)
-# end
+post('/albums/:id/delete') do
+  id = params[:id].to_i
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.execute("DELETE FROM albums WHERE album_id = ?",id)
+  redirect('/albums')
+end
 
 
 # 4 Skapa artister och forma band (table:Artists) Välj instrument till alla spelare (table:Instrument) => relation Artists
-get('/band') do  
-  user = session[:id] #sparar vilken användare som är inloggad
-  current_band = db.execute("SELECT * FROM band")
-  p current_band
-  result = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
-  p result
-
-  slim(:"/band/index",locals:{band:result})
-end
+# get('/band') do  
+#   user = session[:id] #sparar vilken användare som är inloggad
+#   current_band = db.execute("SELECT * FROM band")
+#   p current_band
+#   result = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
+#   p result
+#   slim(:"/band/index",locals:{band:result})
+# end
 
 get('/new_artist') do
   slim(:"band/new")
 end
 
-post('/band') do  
-  title = params[:title]
-  starting_year = params[:starting_year]
+# post('/band') do  
+#   title = params[:title]
+#   starting_year = params[:starting_year]
 
-  artistname = params[:artistname]
-  age = params[:age]
-  country = params[:country]
+#   artistname = params[:artistname]
+#   age = params[:age]
+#   country = params[:country]
+# end
+
+get ('/band/new') do
+  slim(:"band/new")
 end
 
+post ('/band/new') do
+  artistname = params[:artistname]
+  age = params[:age].to_i
+  country = params[:country]
+  instruments = params[:instruments]
+  title = params[:title]
+  starting_year = params[:starting_year]
+  user = session[:id]
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.execute("INSERT INTO band (name, starting_year, user_id) VALUES (?,?,?)", title, starting_year, user)
+  # db.execute("INSERT INTO artists (artistname, age, country, instruments, user_id) VALUES (?,?,?,?,?)",artistname, age, country, instruments, user)
+  redirect('/band/show')
+end 
+
+get('/band/show') do #READ
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.results_as_hash = true
+  user = session[:id]
+  @result = db.execute("SELECT * FROM band WHERE user_id = ?", user)
+ 
+  slim (:"/band/show")
+end
 
 # 6 Välj stad att turnera i (table:Tour) => relation Artists + bestäm pris
 
@@ -212,9 +225,7 @@ post('/calculate') do
             end
   slim :result
   redirect('/tour')
-
 end
-
 
 get('/tour/show') do
   db = SQLite3::Database.new("db/rocknmyb.db") #ta bort

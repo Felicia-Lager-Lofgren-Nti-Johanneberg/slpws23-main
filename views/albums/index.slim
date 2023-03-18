@@ -8,6 +8,8 @@ h2 Your Albums:
     h2 Cover: 
     p = x["picture_id"]
     a href="albums/#{x["album_id"]}" edit
+    form action="/albums/#{x[0]}/delete" method="post"
+        input type="submit" value="Delete" 
     / a href="albums/#{album['album_id']}" #{album["title"]}
 
 p <img src="abba.jpg" class="abba">

@@ -1,0 +1,14 @@
+h2 Band:
+
+- @result.each do |x|
+    h2 Name:
+    p = x["name"]
+    h2 Debut:
+    p = x["starting_year"] 
+    / a href="albums/#{x["album_id"]}" edit
+    / form action="/albums/#{x[0]}/delete" method="post"
+    /     input type="submit" value="Delete" 
+    / a href="albums/#{album['album_id']}" #{album["title"]}
+
+p <img src="abba.jpg" class="abba">
+
