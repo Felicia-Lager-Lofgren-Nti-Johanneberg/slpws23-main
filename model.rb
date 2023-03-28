@@ -19,8 +19,39 @@ class Db_lore
         db.execute("SELECT * FROM User WHERE username=?",username).first
     end
 
-end
+    def albums() #Test
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.results_as_hash = true        
+        db.execute("SELECT * FROM albums WHERE user_id = ?", user)
+        db.execute("SELECT album_id FROM albums")
+    
+    end
 
+    def new_albums
+
+    end
+
+    def edit_albums
+
+    end
+
+    def delete_albums
+
+    end
+
+    def band_new
+
+    end
+
+    def tour_price
+
+    end
+
+    def tour_show 
+
+    end
+
+end 
 
 
 # #Validering:

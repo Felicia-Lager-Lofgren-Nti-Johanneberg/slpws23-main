@@ -14,7 +14,7 @@ nav {
     display:flex;
     justify-content:space-around;
     align-items:center;
-   
+    
   }
   
 
@@ -36,13 +36,14 @@ h1 {
   font-weight:800;
 }
 
-h3 {
+/* h3 {
   color: rgb(0, 0, 0);
   position:absolute; left:45%; top:200px;
   font-size: 50px;
   font-style: italic;
   font-weight:100;
-}
+  
+} */
 
 span {
   color: rgb(255, 255, 255);
@@ -58,9 +59,19 @@ body {
   font-weight: normal;
   overflow-x: hidden;
   width:100%;
-  height:100%;
-  background-image: 
-  radial-gradient(circle farthest-side at top, transparent, #000000), radial-gradient(ellipse farthest-corner at 100% 20%, transparent, #000000d2);
+  height:80%;
+  
+  background-image: radial-gradient(circle farthest-side at top, transparent, #000000), radial-gradient(ellipse farthest-corner at 10% 60%, transparent, #8400ff2f);
+  
+  background-image: url('https://cdn.orangeable.com/img/javascript-equalizer.gif') ;
+
+  /* https://media.tenor.com/WzXfobzzVDIAAAAd/sound-waves-cool-to-watch.gif
+  https://cdn.orangeable.com/img/javascript-equalizer.gif */
+  background-size: contain;
+
+  height: 80vh;
+  padding:0;
+  margin:0;
 }
 
 img {
@@ -79,6 +90,16 @@ img {
 }
 
 
+.rock_cover {
+  width: 1200px;
+  border-right: 110px solid rgb(0, 0, 0);
+  border-left: 110px solid rgb(0, 0, 0);
+  /* margin: 50px 0; */
+
+  top: 0%;
+}
+
+
 input {
   width: 40%;
 }
@@ -94,7 +115,7 @@ input[type=text] {
 }
 
 .notice {
- background:red;
+ background:rgb(255, 11, 11);
  width:60vw;
  padding:50px;
  position:fixed;

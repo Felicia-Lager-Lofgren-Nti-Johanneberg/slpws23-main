@@ -71,12 +71,15 @@ get('/showlogin') do   #loginsida
     slim(:"logout")
  end
 
-# 3 Visa vilka albums som finns och skapa egna album som sparas (+ radera och ändra?) CREATE READ UPDATE DELETE
+# 3 Visa vilka albums som finns och skapa egna album som sparas CREATE READ UPDATE DELETE
 
 get('/albums') do #READ
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.results_as_hash = true
   user = session[:id]
+  
+  # result = Db_lore.new.albums(user) ###HJÄLP
+  
   result = db.execute("SELECT * FROM albums WHERE user_id = ?", user)
   current_albums = db.execute("SELECT album_id FROM albums")
   p current_albums
@@ -95,7 +98,17 @@ post('/albums/new') do #CREATE ALBUM
   p "Vi fick in datan #{title} och #{artist_id}"
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.execute("INSERT INTO albums (title, artist_id, user_id) VALUES (?,?,?)",title, artist_id, user)
+
+
+  #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
+  path = File.join("./public/uploaded_pictures/",params[:file][:filename])
+  #Spara bilden (skriv innehållet i tempfile till destinationen path)
+  File.write(path,File.read(params[:file][:tempfile]))
+
   redirect('/albums')
+
+  
+   
 end
 
 get'/albums/:id' do
@@ -115,15 +128,14 @@ post('/update/:id') do   #EDIT
   redirect('/albums')
 end
 
-
-post('/albums/upload_image') do
-  #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
-  path = File.join("./public/uploaded_pictures/",params[:file][:filename])
-  #Spara bilden (skriv innehållet i tempfile till destinationen path)
-  File.write(path,File.read(params[:file][:tempfile]))
+# post('/albums/upload_image') do
+#   #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
+#   path = File.join("./public/uploaded_pictures/",params[:file][:filename])
+#   #Spara bilden (skriv innehållet i tempfile till destinationen path)
+#   File.write(path,File.read(params[:file][:tempfile]))
   
-  redirect('/albums/upload_image')
-end
+#   redirect('/albums/upload_image')
+# end
 
 post('/albums/:id/delete') do
   id = params[:id].to_i
@@ -183,6 +195,30 @@ get('/band/show') do #READ
   slim (:"/band/show")
 end
 
+
+post('/update_band/:id') do   #EDIT för bandet 
+  title = params[:title]
+  artist_id = params[:artist_id].to_i
+  user = session[:id]
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.execute("UPDATE albums SET title = ?, artist_id = ? WHERE user_id = ?",title, artist_id, user)
+  
+  redirect('/band/show')
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 6 Välj stad att turnera i (table:Tour) => relation Artists + bestäm pris
 
 =begin
@@ -208,7 +244,7 @@ helpers do
   end
  end
 
-get('/') do
+get('/show_calculate') do
  # Visa calculator-sidan
 end
 
@@ -224,7 +260,7 @@ post('/calculate') do
             when '/' then @num1 / @num2
             end
   slim :result
-  redirect('/tour')
+  redirect('/show_calculate')
 end
 
 get('/tour/show') do
