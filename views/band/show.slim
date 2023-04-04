@@ -5,6 +5,16 @@ h2 Band:
     p = x["name"]
     h2 Debut:
     p = x["starting_year"] 
+    / h2 Members 
+    / p = x["first_artist_id"]["artistname"] 
+    / br
+    / p = x["second_artist_id"]["artistname"] 
+    / br
+    / p = x["third_artist_id"]["artistname"] 
+    / br
+    / p = x["fourth_artist_id"]["artistname"] 
+    br
+
     / a href="albums/#{x["album_id"]}" edit
     / form action="/albums/#{x[0]}/delete" method="post"
     /     input type="submit" value="Delete" 

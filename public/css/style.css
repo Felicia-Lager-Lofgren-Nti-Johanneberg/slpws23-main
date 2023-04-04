@@ -14,7 +14,6 @@ nav {
     display:flex;
     justify-content:space-around;
     align-items:center;
-    
   }
   
 
@@ -63,7 +62,7 @@ body {
   
   background-image: radial-gradient(circle farthest-side at top, transparent, #000000), radial-gradient(ellipse farthest-corner at 10% 60%, transparent, #8400ff2f);
   
-  background-image: url('https://cdn.orangeable.com/img/javascript-equalizer.gif') ;
+  /* background-image: url('https://cdn.orangeable.com/img/javascript-equalizer.gif') ; */
 
   /* https://media.tenor.com/WzXfobzzVDIAAAAd/sound-waves-cool-to-watch.gif
   https://cdn.orangeable.com/img/javascript-equalizer.gif */

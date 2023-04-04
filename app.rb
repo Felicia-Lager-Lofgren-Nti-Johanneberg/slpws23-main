@@ -13,8 +13,8 @@ db = SQLite3::Database.new('db/rocknmyb.db')
 
 output=[]
 
-
 get('/')  do
+  redirect('showlogin') unless session[:id]
   slim(:start)
 end 
 
@@ -88,7 +88,7 @@ get('/albums') do #READ
 end
 
 get('/albums/new') do #CREATE ALBUM
-  slim(:"albums/new")
+  slim(:"/albums/new")
 end
 
 post('/albums/new') do #CREATE ALBUM
@@ -100,15 +100,13 @@ post('/albums/new') do #CREATE ALBUM
   db.execute("INSERT INTO albums (title, artist_id, user_id) VALUES (?,?,?)",title, artist_id, user)
 
 
-  #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
-  path = File.join("./public/uploaded_pictures/",params[:file][:filename])
-  #Spara bilden (skriv innehållet i tempfile till destinationen path)
-  File.write(path,File.read(params[:file][:tempfile]))
+  # #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
+  # path = File.join("./public/uploaded_pictures/",params[:file][:filename])                                    #Fixa bild 
+  # #Spara bilden (skriv innehållet i tempfile till destinationen path)
+  # File.write(path,File.read(params[:file][:tempfile]))
 
   redirect('/albums')
 
-  
-   
 end
 
 get'/albums/:id' do
@@ -144,45 +142,44 @@ post('/albums/:id/delete') do
   redirect('/albums')
 end
 
+get('/artist/new') do
+  slim(:"artist/new")
 
-# 4 Skapa artister och forma band (table:Artists) Välj instrument till alla spelare (table:Instrument) => relation Artists
-# get('/band') do  
-#   user = session[:id] #sparar vilken användare som är inloggad
-#   current_band = db.execute("SELECT * FROM band")
-#   p current_band
-#   result = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
-#   p result
-#   slim(:"/band/index",locals:{band:result})
-# end
-
-get('/new_artist') do
-  slim(:"band/new")
 end
 
-# post('/band') do  
-#   title = params[:title]
-#   starting_year = params[:starting_year]
-
-#   artistname = params[:artistname]
-#   age = params[:age]
-#   country = params[:country]
-# end
-
-get ('/band/new') do
-  slim(:"band/new")
-end
-
-post ('/band/new') do
+post('/artist/new') do
   artistname = params[:artistname]
   age = params[:age].to_i
   country = params[:country]
   instruments = params[:instruments]
+  user = session[:id]
+  db.execute("INSERT INTO artists (artistname, age, country, instruments, user_id) VALUES (?,?,?,?,?)",artistname, age, country, instruments, user)
+  redirect('/artist/show')
+end
+
+get('/artist/show') do
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.results_as_hash = true
+  user = session[:id]
+  @result_artist = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
+  slim (:"/artist/show")
+end
+
+get ('/band/new') do
+  db.results_as_hash = true
+  user = session[:id]
+  @artists = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
+  slim(:"band/new")
+end
+
+post ('/band/new') do
+
   title = params[:title]
   starting_year = params[:starting_year]
   user = session[:id]
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.execute("INSERT INTO band (name, starting_year, user_id) VALUES (?,?,?)", title, starting_year, user)
-  # db.execute("INSERT INTO artists (artistname, age, country, instruments, user_id) VALUES (?,?,?,?,?)",artistname, age, country, instruments, user)
+ 
   redirect('/band/show')
 end 
 
@@ -191,10 +188,9 @@ get('/band/show') do #READ
   db.results_as_hash = true
   user = session[:id]
   @result = db.execute("SELECT * FROM band WHERE user_id = ?", user)
- 
+  
   slim (:"/band/show")
 end
-
 
 post('/update_band/:id') do   #EDIT för bandet 
   title = params[:title]
@@ -205,13 +201,6 @@ post('/update_band/:id') do   #EDIT för bandet
   
   redirect('/band/show')
 end
-
-
-
-
-
-
-
 
 
 
@@ -231,6 +220,7 @@ get('/tour') do
 end
 =end
 
+
 get('/tour') do  
   slim(:"tour/index")
 end
@@ -245,7 +235,7 @@ helpers do
  end
 
 get('/show_calculate') do
- # Visa calculator-sidan
+  slim (:tour/forms)
 end
 
 post('/calculate') do
@@ -259,9 +249,16 @@ post('/calculate') do
             when '*' then @num1 * @num2
             when '/' then @num1 / @num2
             end
-  slim :result
-  redirect('/show_calculate')
+            
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  db.execute("INSERT INTO band (name, starting_year, user_id) VALUES (?,?,?)", title, starting_year, user)
+  redirect('/tour/show')
 end
+
+
+
+
+
 
 get('/tour/show') do
   db = SQLite3::Database.new("db/rocknmyb.db") #ta bort

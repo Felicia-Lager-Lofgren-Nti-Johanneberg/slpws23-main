@@ -27,27 +27,33 @@ class Db_lore
     
     end
 
-    def new_albums
+    def new_albums(,)
+        db = SQLite3::Database.new("db/rocknmyb.db")
 
     end
 
-    def edit_albums
+    def edit_albums(,)
+        db = SQLite3::Database.new("db/rocknmyb.db")
 
     end
 
-    def delete_albums
+    def delete_albums(,)
+        db = SQLite3::Database.new("db/rocknmyb.db")
 
     end
 
-    def band_new
+    def band_new(,)
+        db = SQLite3::Database.new("db/rocknmyb.db")
 
     end
 
-    def tour_price
+    def tour_price(,)
+        db = SQLite3::Database.new("db/rocknmyb.db")
 
     end
 
-    def tour_show 
+    def tour_show(,)
+        db = SQLite3::Database.new("db/rocknmyb.db")
 
     end
 
