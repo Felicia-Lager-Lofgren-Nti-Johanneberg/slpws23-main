@@ -1,0 +1,8 @@
+- @alla_användare.each do |anvandare|
+    td = anvandare[1]
+    br
+    form action="admin/#{anvandare[0]}/delete" method="post" 
+        input type="submit" value="delete"
+
+- if @alla_anvandare == nil 
+    h2 Ditt monster! Du har dödat alla 

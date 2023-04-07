@@ -15,14 +15,25 @@ output=[]
 
 get('/')  do
   redirect('showlogin') unless session[:id]
+
+  @privileges = db.execute("SELECT privileges FROM User WHERE id = ?", session[:id]).first
+  p @privileges
   slim(:start)
 end 
+
+get '/admin' do
+  @alla_användare = db.execute("SELECT * FROM User")
+  slim(:admin)
+end
+
+post '/admin/:id/delete' do
+  Db_lore.new.delete_user(params[:id])
+  redirect('/admin')
+end
 
 get '/index' do
   slim(:index)
 end
-
-# 1 REGRISTRERING:
 
 get('/register') do   #regristrering
   slim(:register)
@@ -71,40 +82,25 @@ get('/showlogin') do   #loginsida
     slim(:"logout")
  end
 
-# 3 Visa vilka albums som finns och skapa egna album som sparas CREATE READ UPDATE DELETE
+# 3 Visa vilka albums som finns och skapa egna album som sparas, CREATE READ UPDATE DELETE
 
-get('/albums') do #READ
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.results_as_hash = true
+get('/albums') do 
   user = session[:id]
-  
-  # result = Db_lore.new.albums(user) ###HJÄLP
-  
-  result = db.execute("SELECT * FROM albums WHERE user_id = ?", user)
-  current_albums = db.execute("SELECT album_id FROM albums")
-  p current_albums
-  p result
+  result = Db_lore.new.albums(user) 
   slim(:"/albums/index",locals:{albums:result})
 end
 
-get('/albums/new') do #CREATE ALBUM
+get('/albums/new') do 
   slim(:"/albums/new")
 end
 
-post('/albums/new') do #CREATE ALBUM
+post('/albums/new') do 
   title = params[:title]
   artist_id = params[:artist_id].to_i
   user = session[:id]
   p "Vi fick in datan #{title} och #{artist_id}"
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.execute("INSERT INTO albums (title, artist_id, user_id) VALUES (?,?,?)",title, artist_id, user)
-
-
-  # #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
-  # path = File.join("./public/uploaded_pictures/",params[:file][:filename])                                    #Fixa bild 
-  # #Spara bilden (skriv innehållet i tempfile till destinationen path)
-  # File.write(path,File.read(params[:file][:tempfile]))
-
   redirect('/albums')
 
 end
@@ -126,7 +122,7 @@ post('/update/:id') do   #EDIT
   redirect('/albums')
 end
 
-# post('/albums/upload_image') do
+# post('/albums/upload_image') do                                                                                     #Fix upload picture
 #   #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
 #   path = File.join("./public/uploaded_pictures/",params[:file][:filename])
 #   #Spara bilden (skriv innehållet i tempfile till destinationen path)
@@ -198,74 +194,5 @@ post('/update_band/:id') do   #EDIT för bandet
   user = session[:id]
   db = SQLite3::Database.new("db/rocknmyb.db")
   db.execute("UPDATE albums SET title = ?, artist_id = ? WHERE user_id = ?",title, artist_id, user)
-  
   redirect('/band/show')
-end
-
-
-
-
-
-
-
-# 6 Välj stad att turnera i (table:Tour) => relation Artists + bestäm pris
-
-=begin
-get('/tour') do
-  id = session[:id].to_i
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.results_as_hash = true
-  result = db.execute("SELECT * FROM Tour WHERE id = ?",id)
-  slim(:"albums/index",locals:{Tour:result})
-end
-=end
-
-
-get('/tour') do  
-  slim(:"tour/index")
-end
-
-helpers do
-  def price 
-    db = SQLite3::Database.new('db/rocknmyb.db')
-    db.results_as_hash = true
-  price = db.execute("SELECT price FROM tour")
-    return price
-  end
- end
-
-get('/show_calculate') do
-  slim (:tour/forms)
-end
-
-post('/calculate') do
-
-  @num1 = params[:num1].to_f
-  @num2 = params[:num2].to_f
-  @operator = params[:operator]
-  @result = case @operator
-            when '+' then @num1 + @num2
-            when '-' then @num1 - @num2
-            when '*' then @num1 * @num2
-            when '/' then @num1 / @num2
-            end
-            
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("INSERT INTO band (name, starting_year, user_id) VALUES (?,?,?)", title, starting_year, user)
-  redirect('/tour/show')
-end
-
-
-
-
-
-
-get('/tour/show') do
-  db = SQLite3::Database.new("db/rocknmyb.db") #ta bort
-  db.results_as_hash = true #ta bort
-  result_name = db.execute("SELECT name FROM Tour") #model
-  result_city = db.execute("SELECT city FROM Tour")  #model
-  result_price = db.execute("SELECT price FROM Tour") #model
-  p result_name
-  slim(:index)
 end
