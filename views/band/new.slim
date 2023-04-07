@@ -3,21 +3,21 @@
 form action="/band/new" method="post"
     input type="text" name="title" placeholder="Name of the band"
     input type="text" name="starting_year" placeholder="starting year"
-    select# name= "artist1"
+    select# name="artist1"
         -@artists.each do |artist|
-            option value="#{artist["artist_id"]}" "#{artist["artistname"]}" 
-    select# name= "artist2"
+            option value="#{artist["id"]}" "#{artist["artistname"]}" 
+            p "#{artist["id"]}"
+    select# name="artist2"
         -@artists.each do |artist|
-            option value="#{artist["artist_id"]}" "#{artist["artistname"]}" 
-    select# name= "artist3"
+            option value="#{artist["id"]}" "#{artist["artistname"]}" 
+    select# name="artist3"
         -@artists.each do |artist|
-            option value="#{artist["artist_id"]}" "#{artist["artistname"]}" 
-    select# name= "artist4"
+            option value="#{artist["id"]}" "#{artist["artistname"]}" 
+    select# name="artist4"
         -@artists.each do |artist|
-            option value="#{artist["artist_id"]}" "#{artist["artistname"]}" 
+            option value="#{artist["id"]}" "#{artist["artistname"]}" 
     input type="submit" value="Create Band"
 
 
-
-/  placeholder på options ska vara artistnamnet och value = artist_id. While.loop för att  kolla alla artister 
+/  placeholder på options ska vara artistnamnet och value = artist_id. While.loop för att kolla alla artister 
 / fem artist select,

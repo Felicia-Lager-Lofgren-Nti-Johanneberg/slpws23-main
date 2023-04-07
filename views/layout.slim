@@ -6,30 +6,30 @@ html lang="en"
     link rel="stylesheet" href="/css/style.css"/
     title My webb
   body
+
+
+    <h1 style="color:white;"><span color="red" > Rock </span>'n' Make Your Band</h1>                          
+
+      nav
+
+        a href="/" Start
+        a href="/register" Register
+        a href="/showlogin" Login
+        a href="/logout" logout
+        a href="/band/show" band info
+        a href="/band/new" Create Band      
+        a href="/artist/new" Create artist
+        a href="/albums" Albums
+        a href="/albums/new" Create album                                                                              
   
-  <h1 style="color:white;"><span color="red" > Rock </span>'n' Make Your Band</h1>                           #Fix
+      - if flash[:notice]
+          p.notice = flash[:notice]
 
-    nav
-      a href="/" Start
-      a href="/register" Register
-      a href="/showlogin" Login
-      a href="/logout" logout
-      a href="/band/show" band info
-      a href="/band/new" Create Band      
-      a href="/artist/new" Create artist
-      a href="/albums" Albums
-      a href="/albums/new" Create album
-      / a href="/tour" Tour                                                                                  #Fix
-   
-
-    <img src="rock_cover.jpg" class = "rock_cover">
-  
-
-    - if flash[:notice]
-        p.notice = flash[:notice]
-        
-    ==yield
-    script src="js/main.js"
+      - if session[:username] != nil  
+          h2 Logged in as: #{session[:username][0][0]}
+          
+      ==yield
+      script src="js/main.js"
 
 
-    
+      

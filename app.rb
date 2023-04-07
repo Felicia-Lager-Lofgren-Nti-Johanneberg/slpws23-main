@@ -62,6 +62,7 @@ get('/showlogin') do   #loginsida
  end
  
  post('/login') do
+     db = SQLite3::Database.new('db/rocknmyb.db')   
      username = params[:username]
      password = params[:password]
      result = Db_lore.new.login(username, password)
@@ -69,6 +70,8 @@ get('/showlogin') do   #loginsida
      id = result["id"]
      if BCrypt::Password.new(pwdigest) == password
        session[:id] = id
+       session[:username] = db.execute("SELECT username FROM User WHERE id = ?",session[:id])
+       
        redirect('/')
      else
       "wrong password or username"
@@ -85,40 +88,32 @@ get('/showlogin') do   #loginsida
 # 3 Visa vilka albums som finns och skapa egna album som sparas, CREATE READ UPDATE DELETE
 
 get('/albums') do 
-  user = session[:id]
-  result = Db_lore.new.albums(user) 
-  slim(:"/albums/index",locals:{albums:result})
+  @result = Db_lore.new.albums(session[:id]) 
+  slim(:"/albums/index")
 end
 
-get('/albums/new') do 
+get('/albums/new') do                                                           
   slim(:"/albums/new")
 end
 
-post('/albums/new') do 
-  title = params[:title]
-  artist_id = params[:artist_id].to_i
-  user = session[:id]
-  p "Vi fick in datan #{title} och #{artist_id}"
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("INSERT INTO albums (title, artist_id, user_id) VALUES (?,?,?)",title, artist_id, user)
+post('/albums/new') do                                                                                    
+  Db_lore.new.albums_new(
+  title = params[:title], 
+  artist_id = params[:artist_id].to_i, 
+  user = session[:id])
   redirect('/albums')
-
 end
 
 get'/albums/:id' do
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  @result = db.execute("SELECT * FROM albums WHERE album_id = ?",params[:id]).first
-  p "result är #{@result}"
+  @result = Db_lore.new.albums_edit(params[:id])                             
   slim(:"albums/edit")
 end
 
-post('/update/:id') do   #EDIT
-  title = params[:title]
-  artist_id = params[:artist_id].to_i
-  user = session[:id]
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("UPDATE albums SET title = ?, artist_id = ? WHERE user_id = ?",title, artist_id, user)
-  
+post('/update/:id') do 
+  Db_lore.new.albums_update(                                                                                               
+  title = params[:title],
+  artist_id = params[:artist_id].to_i,
+  user = session[:id])
   redirect('/albums')
 end
 
@@ -132,67 +127,53 @@ end
 # end
 
 post('/albums/:id/delete') do
-  id = params[:id].to_i
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("DELETE FROM albums WHERE album_id = ?",id)
+  Db_lore.new.albums_delete(params[:id].to_i)
   redirect('/albums')
 end
 
 get('/artist/new') do
   slim(:"artist/new")
-
 end
 
-post('/artist/new') do
-  artistname = params[:artistname]
-  age = params[:age].to_i
-  country = params[:country]
-  instruments = params[:instruments]
-  user = session[:id]
-  db.execute("INSERT INTO artists (artistname, age, country, instruments, user_id) VALUES (?,?,?,?,?)",artistname, age, country, instruments, user)
+post('/artist/new') do             
+  Db_lore.new.artist_new(                                                                                     
+  artistname = params[:artistname],
+  age = params[:age].to_i,
+  country = params[:country],
+  instruments = params[:instruments],
+  user = session[:id])
   redirect('/artist/show')
 end
 
 get('/artist/show') do
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.results_as_hash = true
-  user = session[:id]
-  @result_artist = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
+  @result_artist = Db_lore.new.artist_show(session[:id])
   slim (:"/artist/show")
 end
 
 get ('/band/new') do
-  db.results_as_hash = true
-  user = session[:id]
-  @artists = db.execute("SELECT * FROM artists WHERE user_id = ?", user)
+  @artists = Db_lore.new.artist_show(session[:id])
   slim(:"band/new")
 end
 
 post ('/band/new') do
-
-  title = params[:title]
-  starting_year = params[:starting_year]
-  user = session[:id]
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("INSERT INTO band (name, starting_year, user_id) VALUES (?,?,?)", title, starting_year, user)
- 
+  Db_lore.new.band_new(params[:title], params[:starting_year], session[:id], 
+  params[:artist1].to_i,
+  params[:artist2].to_i,
+  params[:artist3].to_i,
+  params[:artist4].to_i)
   redirect('/band/show')
 end 
 
-get('/band/show') do #READ
+get('/band/show') do
   db = SQLite3::Database.new("db/rocknmyb.db")
-  db.results_as_hash = true
-  user = session[:id]
-  @result = db.execute("SELECT * FROM band WHERE user_id = ?", user)
-  
+  @result = Db_lore.new.band_show(session[:id]) 
   slim (:"/band/show")
 end
 
-post('/update_band/:id') do   #EDIT för bandet 
-  title = params[:title]
-  artist_id = params[:artist_id].to_i
-  user = session[:id]
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  db.execute("UPDATE albums SET title = ?, artist_id = ? WHERE user_id = ?",title, artist_id, user)
+post('/update_band/:id') do   
+  Db_lore.new.band_update(
+  title = params[:title],
+  artist_id = params[:artist_id].to_i,
+  user = session[:id])                
   redirect('/band/show')
 end
