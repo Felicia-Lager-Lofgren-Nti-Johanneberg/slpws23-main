@@ -109,6 +109,7 @@ input[type=text] {
   position: relative;
   left: 0%;
   border-radius: 10cm;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 
@@ -120,6 +121,7 @@ input[type=password] {
   position: relative;
   left: 0%;
   border-radius: 10cm;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 input[type=submit] {
@@ -130,6 +132,7 @@ input[type=submit] {
   position: relative;
   left: 0%;
   border-radius: 10cm;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .notice {
