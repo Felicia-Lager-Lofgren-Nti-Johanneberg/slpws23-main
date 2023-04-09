@@ -1,5 +1,21 @@
 h2 Band:
 
+/ - @result_first_artist_id.each do |result|
+/     p = result
+
+
+/ - @result_second_artist.each do |result|                         #Till innerjoin som ska fixas
+/     p = result
+
+    
+/ - @result_third_artist.each do |result|
+/     p = result
+
+    
+/ - @result_fourth_artist.each do |result|
+/     p = result
+
+
 - @result.each do |x|
     h2 Name:
     p = x["name"]
@@ -15,10 +31,6 @@ h2 Band:
     p = x["fourth_artist_id"]
     br
 
-    / a href="albums/#{x["album_id"]}" edit
-    / form action="/albums/#{x[0]}/delete" method="post"
-    /     input type="submit" value="Delete" 
-    / a href="albums/#{album['album_id']}" #{album["title"]}
 
 p <img src="abba.jpg" class="abba">
 

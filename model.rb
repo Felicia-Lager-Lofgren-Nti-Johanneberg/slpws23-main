@@ -73,7 +73,9 @@ class Db_lore
     def band_show(user)
         db = SQLite3::Database.new("db/rocknmyb.db")
         db.results_as_hash = true
-        db.execute("SELECT artistname FROM artists WHERE artists.id = ?", user)        
+        db.execute("SELECT * FROM band WHERE user_id = ?", user)       
+        # @innerjoin = db.execute("SELECT first_artist_id FROM band WHERE user_id = ?", user) 
+        # db.execute("SELECT artistname FROM artists WHERE id = ?", @innerjoin )
     end
 
     def update_band(title, artist_id, user)

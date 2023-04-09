@@ -167,6 +167,16 @@ end
 get('/band/show') do
   db = SQLite3::Database.new("db/rocknmyb.db")
   @result = Db_lore.new.band_show(session[:id]) 
+  # @first_artist = db.execute("SELECT first_artist_id FROM band WHERE user_id = ?", session[:id]).first 
+  # @second_artist = db.execute("SELECT second_artist_id FROM band WHERE user_id = ?", session[:id]).first               #detta ska fixas
+  # @third_artist = db.execute("SELECT third_artist_id FROM band WHERE user_id = ?", session[:id]).first 
+  # @fourth_artist = db.execute("SELECT fourth_artist_id FROM band WHERE user_id = ?", session[:id]).first 
+  # @result_first_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @first_artist)
+  # @result_second_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @second_artist)
+  # @result_third_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @third_artist)
+  # @result_fourth_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @fourth_artist)
+ 
+    
   slim (:"/band/show")
 end
 
