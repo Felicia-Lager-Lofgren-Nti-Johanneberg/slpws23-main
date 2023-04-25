@@ -7,6 +7,8 @@ require 'bcrypt'
 require_relative 'model' 
 require 'sinatra/flash'
 
+
+
 enable :sessions
 
 db = SQLite3::Database.new('db/rocknmyb.db')
@@ -52,31 +54,70 @@ post('/users/new') do   #Ny användare
      redirect('/')
    else
     "wrong"
+
    end
+
+
+
  end
 
 # 2 Logga in, authorization och authentication:
 
 get('/showlogin') do   #loginsida
    slim(:login)
- end
+end
+
+
+
  
- post('/login') do
-     db = SQLite3::Database.new('db/rocknmyb.db')   
-     username = params[:username]
-     password = params[:password]
-     result = Db_lore.new.login(username, password)
-     pwdigest = result["pwdigest"]
-     id = result["id"]
-     if BCrypt::Password.new(pwdigest) == password
-       session[:id] = id
-       session[:username] = db.execute("SELECT username FROM User WHERE id = ?",session[:id])
-       
-       redirect('/')
-     else
-      "wrong password or username"
-     end
-   end
+post('/login') do
+  db = SQLite3::Database.new('db/rocknmyb.db')   
+  username = params[:username]
+  password = params[:password]
+
+  if session[:time] ==  nil
+    session[:time] = Time.new()
+  elsif Time.new - session[:time] < 12                   # Jämföra den nya tiden med den gamla tiden
+    redirect to('/wrong_password')
+  end
+
+
+
+  result = Db_lore.new.login(username, password)
+  pwdigest = result["pwdigest"]
+  id = result["id"]
+
+
+  if BCrypt::Password.new(pwdigest) == password
+    session[:id] = id
+    session[:username] = db.execute("SELECT username FROM User WHERE id = ?",session[:id])
+    
+    redirect('/')
+  else
+  "wrong password or username"
+  flash[:tries_left] = "You have [] tries left"               
+
+  session.clear 
+  end
+  if session[:username] == nil 
+    session[:time] = Time.new()
+    
+  end
+  redirect('/')
+end
+
+
+
+get('/wrong_password') do   
+  slim(:cooldown)
+end
+
+   
+
+
+
+  
+
 
    get('/logout') do
     # logik för utloggning [...]
@@ -187,3 +228,17 @@ post('/update_band/:id') do
   user = session[:id])                
   redirect('/band/show')
 end
+
+
+# def get_random_info_for_user(user)                                            #INNER JOIN
+
+#   Db_lore.new.get_random_info_for_user("SELECT
+#   User.username
+#   albums.title,
+#   band.starting_year
+#   FROM (((User
+#   INNER JOIN username ON User_username = username.id )))
+#   WHERE user_id = ?",User)
+#   return get_random_info_for_user
+  
+# end

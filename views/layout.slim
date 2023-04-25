@@ -27,7 +27,7 @@ html lang="en"
           p.notice = flash[:notice]
 
       - if session[:username] != nil  
-          h2 Logged in as: #{session[:username][0][0]}
+          h2 Logged in as: #{session[:username][0][0]}      
           
       ==yield
       script src="js/main.js"
