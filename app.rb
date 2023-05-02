@@ -7,23 +7,43 @@ require 'bcrypt'
 require_relative 'model' 
 require 'sinatra/flash'
 
-
-
 enable :sessions
 
 db = SQLite3::Database.new('db/rocknmyb.db')
 
 output=[]
 
+
+
+before do
+  # Lista alla begränsade routes
+  restricted_paths = ['/band/', '/band/*', '/admin/', '/admin/*', '/albums/', '/albums/*', '/artist/', '/artist/*']
+  user_id = session[:id]
+  @privileges = db.execute('SELECT privileges FROM User WHERE id=?',user_id).first                                 
+ 
+  # Om användaren inte är inloggad och försöker komma åt en begränsad sökväg,
+  # omdirigera dem till inloggningssidan.	Här har session[:logged_in] satts till “true” vid inloggning. 
+
+  if !session[:logged_in] && restricted_paths.include?(request.path_info)   
+    redirect '/login/:id'
+  end
+ 
+  # Om användaren är inloggad men inte är en administratör och försöker komma åt en administratörssökväg,
+  # omdirigera dem till startsidan. Här har session[:admin] satts till “true” vid inloggningen.
+
+  if session[:logged_in] && @privileges != 1 && request.path_info == '/admin'
+    redirect '/login/:id'
+  end
+end
+
 get('/')  do
-  redirect('showlogin') unless session[:id]
 
   @privileges = db.execute("SELECT privileges FROM User WHERE id = ?", session[:id]).first
   p @privileges
   slim(:start)
 end 
 
-get '/admin' do
+get '/admin/' do
   @alla_användare = db.execute("SELECT * FROM User")
   slim(:admin)
 end
@@ -53,27 +73,22 @@ post('/users/new') do   #Ny användare
      Db_lore.new.new_user(username, password_digest)
      redirect('/')
    else
-    "wrong"
+    "wrong password"
 
    end
-
-
-
- end
+end
 
 # 2 Logga in, authorization och authentication:
 
-get('/showlogin') do   #loginsida
+get('/login/:id') do   #loginsida
    slim(:login)
 end
-
-
-
  
 post('/login') do
   db = SQLite3::Database.new('db/rocknmyb.db')   
   username = params[:username]
   password = params[:password]
+
 
   if session[:time] ==  nil
     session[:time] = Time.new()
@@ -81,54 +96,43 @@ post('/login') do
     redirect to('/wrong_password')
   end
 
-
-
   result = Db_lore.new.login(username, password)
   pwdigest = result["pwdigest"]
   id = result["id"]
 
-
   if BCrypt::Password.new(pwdigest) == password
     session[:id] = id
     session[:username] = db.execute("SELECT username FROM User WHERE id = ?",session[:id])
-    
+    session[:logged_in] = true                                                                               #Before block
     redirect('/')
-  else
-  "wrong password or username"
-  flash[:tries_left] = "You have [] tries left"               
 
+  else
+  "Wrong password or username"
+  flash[:tries_left] = "You have [] tries left"
+  session[:logged_in] = false                 
   session.clear 
   end
+
   if session[:username] == nil 
     session[:time] = Time.new()
-    
   end
   redirect('/')
 end
-
-
 
 get('/wrong_password') do   
   slim(:cooldown)
 end
 
-   
-
-
-
-  
-
-
-   get('/logout') do
-    # logik för utloggning [...]
-    flash[:notice] = "You have been logged out!"
-    session.clear 
-    slim(:"logout")
- end
+get('/logout') do
+  # logik för utloggning [...]
+  flash[:notice] = "You have been logged out!"
+  session.clear 
+  slim(:"logout")
+end
 
 # 3 Visa vilka albums som finns och skapa egna album som sparas, CREATE READ UPDATE DELETE
 
-get('/albums') do 
+get('/albums/') do 
   @result = Db_lore.new.albums(session[:id]) 
   slim(:"/albums/index")
 end
@@ -142,7 +146,7 @@ post('/albums/new') do
   title = params[:title], 
   artist_id = params[:artist_id].to_i, 
   user = session[:id])
-  redirect('/albums')
+  redirect('/albums/')
 end
 
 get'/albums/:id' do
@@ -155,21 +159,17 @@ post('/update/:id') do
   title = params[:title],
   artist_id = params[:artist_id].to_i,
   user = session[:id])
-  redirect('/albums')
+  redirect('/albums/')
 end
-
-# post('/albums/upload_image') do                                                                                     #Fix upload picture
-#   #Skapa en sträng med join "./public/uploaded_pictures/cat.png"
-#   path = File.join("./public/uploaded_pictures/",params[:file][:filename])
-#   #Spara bilden (skriv innehållet i tempfile till destinationen path)
-#   File.write(path,File.read(params[:file][:tempfile]))
-  
-#   redirect('/albums/upload_image')
-# end
 
 post('/albums/:id/delete') do
   Db_lore.new.albums_delete(params[:id].to_i)
-  redirect('/albums')
+  redirect('/albums/')
+end
+
+get('/artist/') do
+  @result_artist = Db_lore.new.artist_show(session[:id])
+  slim (:"/artist/show")
 end
 
 get('/artist/new') do
@@ -183,13 +183,9 @@ post('/artist/new') do
   country = params[:country],
   instruments = params[:instruments],
   user = session[:id])
-  redirect('/artist/show')
+  redirect('/artist/')
 end
 
-get('/artist/show') do
-  @result_artist = Db_lore.new.artist_show(session[:id])
-  slim (:"/artist/show")
-end
 
 get ('/band/new') do
   @artists = Db_lore.new.artist_show(session[:id])
@@ -202,10 +198,10 @@ post ('/band/new') do
   params[:artist2].to_i,
   params[:artist3].to_i,
   params[:artist4].to_i)
-  redirect('/band/show')
+  redirect('/band/index')
 end 
 
-get('/band/show') do
+get('/band/index') do
   db = SQLite3::Database.new("db/rocknmyb.db")
   @result = Db_lore.new.band_show(session[:id]) 
   # @first_artist = db.execute("SELECT first_artist_id FROM band WHERE user_id = ?", session[:id]).first 
@@ -217,16 +213,15 @@ get('/band/show') do
   # @result_third_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @third_artist)
   # @result_fourth_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @fourth_artist)
  
-    
-  slim (:"/band/show")
+  slim (:'/band/index')
 end
 
-post('/update_band/:id') do   
+post('/band/:id/update') do   
   Db_lore.new.band_update(
   title = params[:title],
   artist_id = params[:artist_id].to_i,
   user = session[:id])                
-  redirect('/band/show')
+  redirect('/band/index')
 end
 
 
