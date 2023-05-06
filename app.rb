@@ -9,17 +9,11 @@ require 'sinatra/flash'
 
 enable :sessions
 
-db = SQLite3::Database.new('db/rocknmyb.db')
-
-output=[]
-
-
-
 before do
   # Lista alla begränsade routes
-  restricted_paths = ['/band/', '/band/*', '/admin/', '/admin/*', '/albums/', '/albums/*', '/artist/', '/artist/*']
+  restricted_paths = ['/band/', '/band/*', '/admin/', '/admin/*', '/albums/', '/albums/*', '/artist/', '/artist/*', '/artist/new','/artist/new*', '/band/new','/band/new*', '/albums/new','/albums/new*'  ]
   user_id = session[:id]
-  @privileges = db.execute('SELECT privileges FROM User WHERE id=?',user_id).first                                 
+  @privileges = Db_lore.new.privileges(user_id)                                 
  
   # Om användaren inte är inloggad och försöker komma åt en begränsad sökväg,
   # omdirigera dem till inloggningssidan.	Här har session[:logged_in] satts till “true” vid inloggning. 
@@ -36,24 +30,25 @@ before do
   end
 end
 
-get('/')  do
 
-  @privileges = db.execute("SELECT privileges FROM User WHERE id = ?", session[:id]).first
-  p @privileges
+# Display Landing Page
+#
+get('/')  do
+  @privileges =  Db_lore.new.privileges(session[:id])
   slim(:start)
 end 
 
 get '/admin/' do
-  @alla_användare = db.execute("SELECT * FROM User")
+  @alla_användare = Db_lore.new.all_users()
   slim(:admin)
 end
 
 post '/admin/:id/delete' do
   Db_lore.new.delete_user(params[:id])
-  redirect('/admin')
+  redirect('/admin/')
 end
 
-get '/index' do
+get '/index/' do
   slim(:index)
 end
 
@@ -102,8 +97,8 @@ post('/login') do
 
   if BCrypt::Password.new(pwdigest) == password
     session[:id] = id
-    session[:username] = db.execute("SELECT username FROM User WHERE id = ?",session[:id])
-    session[:logged_in] = true                                                                               #Before block
+    session[:username] = Db_lore.new.username(session[:id])
+    session[:logged_in] = true                                                                               
     redirect('/')
 
   else
@@ -124,13 +119,10 @@ get('/wrong_password') do
 end
 
 get('/logout') do
-  # logik för utloggning [...]
   flash[:notice] = "You have been logged out!"
   session.clear 
   slim(:"logout")
 end
-
-# 3 Visa vilka albums som finns och skapa egna album som sparas, CREATE READ UPDATE DELETE
 
 get('/albums/') do 
   @result = Db_lore.new.albums(session[:id]) 
@@ -187,6 +179,21 @@ post('/artist/new') do
 end
 
 
+get('/band/') do
+  db = SQLite3::Database.new("db/rocknmyb.db")
+  @result = Db_lore.new.band_show(session[:id]) 
+
+  @first_artist_id = Db_lore.new.first_artist(@result[0]['user_id'].to_i)
+
+  @second_artist_id = Db_lore.new.second_artist(@result[0]['user_id'].to_i)
+
+  @third_artist_id = Db_lore.new.third_artist(@result[0]['user_id'].to_i)
+
+  @fourth_artist_id = Db_lore.new.fourth_artist(@result[0]['user_id'].to_i)
+
+  slim (:'/band/index')
+end
+
 get ('/band/new') do
   @artists = Db_lore.new.artist_show(session[:id])
   slim(:"band/new")
@@ -198,42 +205,15 @@ post ('/band/new') do
   params[:artist2].to_i,
   params[:artist3].to_i,
   params[:artist4].to_i)
-  redirect('/band/index')
+  redirect('/band/')
 end 
 
-get('/band/index') do
-  db = SQLite3::Database.new("db/rocknmyb.db")
-  @result = Db_lore.new.band_show(session[:id]) 
-  # @first_artist = db.execute("SELECT first_artist_id FROM band WHERE user_id = ?", session[:id]).first 
-  # @second_artist = db.execute("SELECT second_artist_id FROM band WHERE user_id = ?", session[:id]).first               #detta ska fixas
-  # @third_artist = db.execute("SELECT third_artist_id FROM band WHERE user_id = ?", session[:id]).first 
-  # @fourth_artist = db.execute("SELECT fourth_artist_id FROM band WHERE user_id = ?", session[:id]).first 
-  # @result_first_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @first_artist)
-  # @result_second_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @second_artist)
-  # @result_third_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @third_artist)
-  # @result_fourth_artist = db.execute("SELECT artistname FROM artists WHERE id = ?", @fourth_artist)
- 
-  slim (:'/band/index')
-end
 
 post('/band/:id/update') do   
   Db_lore.new.band_update(
   title = params[:title],
   artist_id = params[:artist_id].to_i,
   user = session[:id])                
-  redirect('/band/index')
+  redirect('/band/')
 end
 
-
-# def get_random_info_for_user(user)                                            #INNER JOIN
-
-#   Db_lore.new.get_random_info_for_user("SELECT
-#   User.username
-#   albums.title,
-#   band.starting_year
-#   FROM (((User
-#   INNER JOIN username ON User_username = username.id )))
-#   WHERE user_id = ?",User)
-#   return get_random_info_for_user
-  
-# end

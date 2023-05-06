@@ -6,7 +6,10 @@ require 'byebug'
 require 'sqlite3'
 require 'bcrypt'
 
+
+
 class Db_lore
+
 
     def new_user(username, password_digest)
         db = SQLite3::Database.new('db/rocknmyb.db')
@@ -81,6 +84,52 @@ class Db_lore
     def update_band(title, artist_id, user)
         db = SQLite3::Database.new("db/rocknmyb.db")
         db.execute("UPDATE albums SET title = ?, artist_id = ? WHERE user_id = ?",title, artist_id, user)    
+    end
+
+    def first_artist(user_id)
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute('SELECT artistname, artists.id
+        FROM artists INNER JOIN band ON band.first_artist_id = artists.id 
+        WHERE band.user_id = ?', user_id)
+    end
+
+    def second_artist(user_id)
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute('SELECT artistname, artists.id
+        FROM artists INNER JOIN band ON band.second_artist_id = artists.id 
+        WHERE band.user_id = ?', user_id)
+
+    end
+
+    def third_artist(user_id)
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute('SELECT artistname, artists.id
+        FROM artists INNER JOIN band ON band.third_artist_id = artists.id 
+        WHERE band.user_id = ?', user_id)
+
+    end
+
+    def fourth_artist(user_id)
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute('SELECT artistname, artists.id
+        FROM artists INNER JOIN band ON band.fourth_artist_id = artists.id                                
+        WHERE band.user_id = ?', user_id)
+
+    end
+
+    def username(user_id)
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute("SELECT username FROM User WHERE id = ?", user_id)
+    end
+
+    def all_users()
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute("SELECT * FROM User")
+    end
+
+    def privileges(user_id)
+        db = SQLite3::Database.new("db/rocknmyb.db")
+        db.execute("SELECT privileges FROM User WHERE id = ?", user_id).first
     end
 
  end 

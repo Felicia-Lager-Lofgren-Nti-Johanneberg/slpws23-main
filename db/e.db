@@ -1,0 +1,57 @@
+BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS "albums" (
+	"album_id"	INTEGER NOT NULL,
+	"title"	TEXT NOT NULL,
+	"artist_id"	INTEGER NOT NULL,
+	"picture_id"	TEXT,
+	"user_id"	INTEGER,
+	PRIMARY KEY("album_id")
+);
+CREATE TABLE IF NOT EXISTS "artists" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"artistname"	TEXT NOT NULL,
+	"country"	TEXT NOT NULL,
+	"age"	TEXT NOT NULL,
+	"instruments"	TEXT NOT NULL,
+	"user_id"	INTEGER NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+CREATE TABLE IF NOT EXISTS "band" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"name"	TEXT NOT NULL,
+	"starting_year"	TEXT NOT NULL,
+	"user_id"	INTEGER NOT NULL,
+	"first_artist_id"	INTEGER,
+	"second_artist_id"	INTEGER,
+	"third_artist_id"	INTEGER,
+	"fourth_artist_id"	INTEGER,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+CREATE TABLE IF NOT EXISTS "User" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"username"	TEXT NOT NULL,
+	"pwdigest"	TEXT NOT NULL,
+	"privileges"	INTEGER,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+INSERT INTO "albums" VALUES (4,'röd',2002,NULL,35);
+INSERT INTO "albums" VALUES (5,'r',0,NULL,NULL);
+INSERT INTO "albums" VALUES (6,'ygu',23,NULL,NULL);
+INSERT INTO "albums" VALUES (7,'test',20032,NULL,NULL);
+INSERT INTO "albums" VALUES (8,'weq',0,NULL,NULL);
+INSERT INTO "albums" VALUES (9,'e',0,NULL,NULL);
+INSERT INTO "albums" VALUES (10,'e',0,NULL,NULL);
+INSERT INTO "albums" VALUES (11,'r',0,NULL,NULL);
+INSERT INTO "artists" VALUES (17,'Tony Kanal','Great Britain','28','base',35);
+INSERT INTO "artists" VALUES (18,'Adrian Young','USA','29','drums',35);
+INSERT INTO "artists" VALUES (19,'Tom Dumont ','USA','31','guitar',35);
+INSERT INTO "artists" VALUES (21,'Gwen Stefani','USA','30','singer',35);
+INSERT INTO "artists" VALUES (22,'xs','s','0','base',35);
+INSERT INTO "artists" VALUES (23,'a','USA','19','guitar',41);
+INSERT INTO "artists" VALUES (24,'re','ret','56','base',43);
+INSERT INTO "band" VALUES (35,'NO Doubt','1986',35,17,18,19,17);
+INSERT INTO "band" VALUES (36,'HEJ','2002',35,19,17,18,20);
+INSERT INTO "band" VALUES (37,'HEJ','2023',35,21,18,19,17);
+INSERT INTO "band" VALUES (38,'a','2005',41,23,23,23,23);
+INSERT INTO "User" VALUES (43,'e','$2a$12$itKYfBRlzroBhDf9p6AHOeZjchRK6OiLeaWy6fmKwDn.vP2ZpkKsq',1);
+COMMIT;

@@ -22,14 +22,40 @@ h2 Band:
     h2 Debut:
     p = x["starting_year"] 
     h2 Members 
-    p = x["first_artist_id"]
+    - @first_artist_id.each do |first|
+        - if x["first_artist_id"] == first[1]
+            p = first[0]
     br
-    p = x["second_artist_id"]
+    - @second_artist_id.each do |second|
+        - if x["second_artist_id"] == second[1]
+            p = second[0]
     br
-    p = x["third_artist_id"]
+    - @third_artist_id.each do |third|
+        - if x["third_artist_id"] == third[1]
+            p = third[0]
     br
-    p = x["fourth_artist_id"]
+    - @fourth_artist_id.each do |fourth|
+        - if x["fourth_artist_id"] == fourth[1]
+            p = fourth[0]
     br
+    / - @artists.each do |artist|
+    /     - if x["first_artist_id"] == artist['id'] 
+    /         p = artist["artistname"]  
+    / br
+    / - @artists.each do |artist|
+    /     - if x["second_artist_id"] == artist['id'] 
+    /         p = artist["artistname"]  
+    / br
+    / - @artists.each do |artist|
+    /     - if x["third_artist_id"] == artist['id'] 
+    /         p = artist["artistname"]  
+    / br
+    / - @artists.each do |artist|
+    /     - if x["fourth_artist_id"] == artist['id'] 
+    /         p = artist["artistname"]  
+    / br
+
+
 
 
 p <img src="abba.jpg" class="abba">
