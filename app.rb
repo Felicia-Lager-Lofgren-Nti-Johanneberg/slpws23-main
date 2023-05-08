@@ -9,21 +9,18 @@ require 'sinatra/flash'
 
 enable :sessions
 
+include Db_lore
+
 before do
-  # Lista alla begränsade routes
   restricted_paths = ['/band/', '/band/*', '/admin/', '/admin/*', '/albums/', '/albums/*', '/artist/', '/artist/*', '/artist/new','/artist/new*', '/band/new','/band/new*', '/albums/new','/albums/new*'  ]
   user_id = session[:id]
   @privileges = Db_lore.new.privileges(user_id)                                 
  
-  # Om användaren inte är inloggad och försöker komma åt en begränsad sökväg,
-  # omdirigera dem till inloggningssidan.	Här har session[:logged_in] satts till “true” vid inloggning. 
 
   if !session[:logged_in] && restricted_paths.include?(request.path_info)   
     redirect '/login/:id'
   end
  
-  # Om användaren är inloggad men inte är en administratör och försöker komma åt en administratörssökväg,
-  # omdirigera dem till startsidan. Här har session[:admin] satts till “true” vid inloggningen.
 
   if session[:logged_in] && @privileges != 1 && request.path_info == '/admin'
     redirect '/login/:id'
@@ -37,6 +34,7 @@ get('/')  do
   @privileges =  Db_lore.new.privileges(session[:id])
   slim(:start)
 end 
+
 
 get '/admin/' do
   @alla_användare = Db_lore.new.all_users()
@@ -52,30 +50,37 @@ get '/index/' do
   slim(:index)
 end
 
-get('/register') do   #regristrering
+# Display the register form
+#
+# @return [String] takes you to the registration form
+get('/register') do  
   slim(:register)
 end
 
-post('/users/new') do   #Ny användare
+# Registers a new user with the provided username and password
+#
+# @option [string] :username 
+# @option [string] :password
+# @option [string] :password_confirm
+# @return void
+post('/users/new') do 
     
   username = params[:username]
   password = params[:password]
   password_confirm = params[:password_confirm]
  
    if (password == password_confirm)
-     #Lägg till användare
+    
      password_digest = BCrypt::Password.create(password)
      Db_lore.new.new_user(username, password_digest)
      redirect('/')
    else
     "wrong password"
-
    end
 end
 
-# 2 Logga in, authorization och authentication:
 
-get('/login/:id') do   #loginsida
+get('/login/:id') do   
    slim(:login)
 end
  
@@ -87,7 +92,7 @@ post('/login') do
 
   if session[:time] ==  nil
     session[:time] = Time.new()
-  elsif Time.new - session[:time] < 12                   # Jämföra den nya tiden med den gamla tiden
+  elsif Time.new - session[:time] < 12                   
     redirect to('/wrong_password')
   end
 
@@ -207,7 +212,6 @@ post ('/band/new') do
   params[:artist4].to_i)
   redirect('/band/')
 end 
-
 
 post('/band/:id/update') do   
   Db_lore.new.band_update(
