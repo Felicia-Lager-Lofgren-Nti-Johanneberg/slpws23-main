@@ -11,6 +11,9 @@ enable :sessions
 
 include Db_lore
 
+# Restricts the user from entering specific routes
+#
+#
 before do
   restricted_paths = ['/band/', '/band/*', '/admin/', '/admin/*', '/albums/', '/albums/*', '/artist/', '/artist/*', '/artist/new','/artist/new*', '/band/new','/band/new*', '/albums/new','/albums/new*'  ]
   user_id = session[:id]
@@ -28,31 +31,40 @@ before do
 end
 
 
-# Display Landing Page
+# HTTP GET request handler for the root path ('/')
+#
+# @return [String] the rendered slim template for the 'start' page
 #
 get('/')  do
   @privileges =  Db_lore.new.privileges(session[:id])
   slim(:start)
 end 
 
-
+# Displays a admin site if the user is admin 
+#
+# 
 get '/admin/' do
   @alla_användare = Db_lore.new.all_users()
   slim(:admin)
 end
-
+# Gives the admin the opportunity to delete users 
+#
+# return void
 post '/admin/:id/delete' do
   Db_lore.new.delete_user(params[:id])
   redirect('/admin/')
 end
 
+# HTTP GET request handler for the '/index/' path
+#
+# @return [String] the rendered slim template for the 'index' page
 get '/index/' do
   slim(:index)
 end
 
 # Display the register form
 #
-# @return [String] takes you to the registration form
+# 
 get('/register') do  
   slim(:register)
 end
@@ -62,7 +74,6 @@ end
 # @option [string] :username 
 # @option [string] :password
 # @option [string] :password_confirm
-# @return void
 post('/users/new') do 
     
   username = params[:username]
@@ -79,11 +90,14 @@ post('/users/new') do
    end
 end
 
-
+# Displays a login form
+#
+# 
 get('/login/:id') do   
    slim(:login)
 end
  
+
 post('/login') do
   db = SQLite3::Database.new('db/rocknmyb.db')   
   username = params[:username]
@@ -118,17 +132,24 @@ post('/login') do
   end
   redirect('/')
 end
-
+# Displays a cooldown if user tries to enter wrong login informationen again and again within 12 seconds.
+#
+#
 get('/wrong_password') do   
   slim(:cooldown)
 end
 
+#
+#
+# 
 get('/logout') do
   flash[:notice] = "You have been logged out!"
   session.clear 
   slim(:"logout")
 end
-
+#
+#
+# 
 get('/albums/') do 
   @result = Db_lore.new.albums(session[:id]) 
   slim(:"/albums/index")
@@ -164,15 +185,24 @@ post('/albums/:id/delete') do
   redirect('/albums/')
 end
 
+# Shows the users created artists 
+# 
+# 
 get('/artist/') do
   @result_artist = Db_lore.new.artist_show(session[:id])
   slim (:"/artist/show")
 end
 
+# Sends user to the new artist form                                                                                   
+#
+# 
 get('/artist/new') do
   slim(:"artist/new")
 end
 
+# User comes to the artist form to create an artist
+#
+#
 post('/artist/new') do             
   Db_lore.new.artist_new(                                                                                     
   artistname = params[:artistname],
@@ -182,7 +212,6 @@ post('/artist/new') do
   user = session[:id])
   redirect('/artist/')
 end
-
 
 get('/band/') do
   db = SQLite3::Database.new("db/rocknmyb.db")
@@ -198,6 +227,7 @@ get('/band/') do
 
   slim (:'/band/index')
 end
+
 
 get ('/band/new') do
   @artists = Db_lore.new.artist_show(session[:id])

@@ -10,11 +10,30 @@ module Db_lore
 
 class Db_lore
 
-
+       
+    # Attempts to create a new user
+    #
+    # @param [Hash] params form data
+    # @option params [String] username The username
+    # @option params [String] password The password
+    #
+    # @return [Hash]
+    #   * :error [Boolean] whether an error occured
+    #   * :message [String] the error message if an error occured
+    #   * :user_id [Integer] The user's ID if the user was created
     def new_user(username, password_digest)
         db = SQLite3::Database.new('db/rocknmyb.db')
         db.execute("INSERT INTO User (username,pwdigest) VALUES (?,?)", username, password_digest)
     end
+    
+    # Gives the user a chance to login
+    #
+    # @param [Hash] params form data
+    # @option params [String] username The username
+    # @option params [String] password The password
+    #
+    # @return [Integer] The ID of the user
+    # @return [false] if credentials do not match a user
 
     def login(username, password_digest)
         db = SQLite3::Database.new('db/rocknmyb.db')   
