@@ -28,13 +28,6 @@ class Db_lore
     
     # Gives the user a chance to login
     #
-    # @param [Hash] params form data
-    # @option params [String] username The username
-    # @option params [String] password The password
-    #
-    # @return [Integer] The ID of the user
-    # @return [false] if credentials do not match a user
-
     def login(username, password_digest)
         db = SQLite3::Database.new('db/rocknmyb.db')   
         db.results_as_hash = true
