@@ -21,6 +21,7 @@ class Db_lore
     #   * :error [Boolean] whether an error occured
     #   * :message [String] the error message if an error occured
     #   * :user_id [Integer] The user's ID if the user was created
+
     def new_user(username, password_digest)
         db = SQLite3::Database.new('db/rocknmyb.db')
         db.execute("INSERT INTO User (username,pwdigest) VALUES (?,?)", username, password_digest)
@@ -28,6 +29,13 @@ class Db_lore
     
     # Gives the user a chance to login
     #
+    # @param [Hash] params form data
+    # @option params [String] username The username
+    # @option params [String] password The password
+    #
+    # @return [Integer] The ID of the user
+    # @return [false] if credentials do not match a user
+
     def login(username, password_digest)
         db = SQLite3::Database.new('db/rocknmyb.db')   
         db.results_as_hash = true
@@ -40,6 +48,20 @@ class Db_lore
         return db.execute("SELECT * FROM albums WHERE user_id = ?", user)
     end
 
+    
+    # Attempts to delete a row from the user table
+    #
+    # @param [Integer] user_id The users's ID
+    # @param [Hash] params form data
+    # @option params [String] username The username of the user 
+    # @option params [String] artists The artists of the user
+    # @option params [String] albums The albums of the user
+    # @option params [String] band The band of the user
+    #
+    # @return [Hash]
+    #   * :error [Boolean] whether an error occured
+    #   * :message [String] the error message
+    
     def delete_user(id)
         db = SQLite3::Database.new("db/rocknmyb.db")
         db.execute("DELETE FROM User WHERE id = ?", id)
@@ -47,6 +69,16 @@ class Db_lore
         db.execute("DELETE FROM albums WHERE album_id = ?", id)
         db.execute("DELETE FROM band WHERE id = ?", id)
     end
+
+    # Attempts to insert a new row in the albums table
+    #
+    # @param [Hash] params form data
+    # @option params [String] title The title of the article
+    # @option params [String] content The content of the article                                                                         #Ej klar
+    #
+    # @return [Hash]
+    #   * :error [Boolean] whether an error occured
+    #   * :message [String] the error message
 
     def albums_new(title, artist_id, user)
         db = SQLite3::Database.new("db/rocknmyb.db")
